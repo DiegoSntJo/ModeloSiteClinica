@@ -54,7 +54,7 @@
           $senha = addslashes($_POST['senha']);
           //verificar se esta preenchido
           if(!empty($email) && !empty($senha)){
-            $u->conectar("projeto_login","localhost","root","");
+          $u->conectar();
             if($u->msgErro == ""){
               if($u->logar($email,$senha)){
                 header("location: Agendamento/menu.php");
@@ -67,7 +67,7 @@
             }
             else{
               ?>
-                <div class="msg-erro"><?phpecho "Erro: ".$u->$msgErro;?></div>
+              <div class="msg-erro"><?php echo "Erro: " . $u->msgErro; ?></div>
               <?php
             }
           }

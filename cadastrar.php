@@ -60,7 +60,7 @@
                 $confirmarSenha = addslashes($_POST['confSenha']);
                 //verificar se esta preenchido
                 if(!empty($nome) && !empty($telefone) && !empty($email) && !empty($senha) && !empty($confirmarSenha)){
-                        $u->conectar("projeto_login","localhost","root","");
+                        $u->conectar();
                         if($u->msgErro == "")//esta tudo ok
                         {
                             if($senha == $confirmarSenha){
@@ -81,7 +81,7 @@
                         }
                     }else{
                         ?>
-                        <div class="msg-erro"><?phpecho "Erro: ".$u->$msgErro;?></div>
+                            <div class="msg-erro"><?php echo "Erro: " . $u->msgErro; ?></div>
                         <?php
                     }
                 }else{

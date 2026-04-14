@@ -1,22 +1,36 @@
-name: 🚀 Deploy para InfinityFree
+name: Deploy para InfinityFree
 
 on:
   push:
     branches:
-      - main  # Ou a sua branch principal
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: infinityfree-deploy
+  cancel-in-progress: true
 
 jobs:
   web-deploy:
-    name: 🎉 Deploy via FTP
+    name: Deploy via FTP
     runs-on: ubuntu-latest
     steps:
-      - name: 🚚 Pegando o código atual
+      - name: Checkout do codigo
         uses: actions/checkout@v4
 
-      - name: 📂 Sincronizando arquivos
+      - name: Sincronizando arquivos
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /htdocs/  # Pasta raiz do InfinityFree
+          protocol: ftp
+          port: 21
+          server-dir: /htdocs/
+          state-name: .ftp-deploy-sync-state.json
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            DEPLOY.md
+            config/database.local.php

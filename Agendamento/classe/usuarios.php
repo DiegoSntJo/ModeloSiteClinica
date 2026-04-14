@@ -1,20 +1,16 @@
 <?php
 
-$host="localhost";
-$usuario="root";
-$senha="";
-$bd="projeto_tabela";
+require_once __DIR__ . '/../../config/database.php';
 
-$db_conec= mysqli_connect($host,$usuario,$senha,$bd);
+$db_conec = null;
+$mysqli = null;
 
-if(mysqli_connect_error()):
-    echo "Falha na conexão: ".mysqli_connect_error();
-endif;
-
-$mysqli=new mysqli($host,$usuario,$senha,$bd);
-
-if($mysqli->connect_errno)
-    echo "Falha na conexão: (".$mysqli->connect_errno.") ".$mysqli->connect_error;
+try {
+	$db_conec = clinic_create_mysqli('appointments');
+	$mysqli = $db_conec;
+} catch (Throwable $e) {
+	echo "Falha na conexão: " . $e->getMessage();
+}
 
 
 Class Usuario
@@ -22,22 +18,21 @@ Class Usuario
 	private $pdo;
 	public $msgErro = "";//tudo ok
 
-	public function conectar($nome, $host, $usuario, $senha)
+	public function conectar()
 	{
-		global $pdo;
 		try 
 		{
-			$pdo = new PDO("mysql:dbname=".$nome,$usuario,$senha);
-		} catch (PDOException $e) {
-			$msgErro = $e->getMessage();
+			$this->pdo = clinic_create_pdo('appointments');
+			$this->msgErro = "";
+		} catch (Throwable $e) {
+			$this->msgErro = $e->getMessage();
 		}
 	}
 
 	public function cadastrar($email, $senha)
 	{
-		global $pdo;
 		//verificar se já existe o email cadastrado
-		$sql = $pdo->prepare("SELECT id_usuario FROM usuarios WHERE email = :e");
+		$sql = $this->pdo->prepare("SELECT id_usuario FROM usuarios WHERE email = :e");
 		$sql->bindValue(":e",$email);
 		$sql->execute();
 		if($sql->rowCount() > 0)
@@ -47,7 +42,7 @@ Class Usuario
 		else
 		{
 			//caso nao, Cadastrar
-			$sql = $pdo->prepare("INSERT INTO usuarios (email, senha) VALUES (:e, :s)");
+			$sql = $this->pdo->prepare("INSERT INTO usuarios (email, senha) VALUES (:e, :s)");
 			$sql->bindValue(":e",$email);
 			$sql->bindValue(":s",($senha));
 			$sql->execute();
@@ -58,9 +53,8 @@ Class Usuario
 
 	public function logar($email, $senha)
 	{
-		global $pdo;
 		//verificar se o email e senha estao cadastrados, se sim
-		$sql = $pdo->prepare("SELECT id_usuario FROM usuarios WHERE email = :e AND senha = :s");
+		$sql = $this->pdo->prepare("SELECT id_usuario FROM usuarios WHERE email = :e AND senha = :s");
 		$sql->bindValue(":e",$email);
 		$sql->bindValue(":s",($senha));
 		$sql->execute();

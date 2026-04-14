@@ -1,26 +1,27 @@
 <?php
 
+require_once __DIR__ . '/../config/database.php';
+
 Class Usuario
 {
 	private $pdo;
 	public $msgErro = "";//tudo ok
 
-	public function conectar($nome, $host, $usuario, $senha)
+	public function conectar()
 	{
-		global $pdo;
 		try 
 		{
-			$pdo = new PDO("mysql:dbname=".$nome,$usuario,$senha);
-		} catch (PDOException $e) {
-			$msgErro = $e->getMessage();
+			$this->pdo = clinic_create_pdo('auth');
+			$this->msgErro = "";
+		} catch (Throwable $e) {
+			$this->msgErro = $e->getMessage();
 		}
 	}
 
 	public function cadastrar($nome, $telefone, $email, $senha)
 	{
-		global $pdo;
 		//verificar se já existe o email cadastrado
-		$sql = $pdo->prepare("SELECT id_usuario FROM usuarios WHERE email = :e");
+		$sql = $this->pdo->prepare("SELECT id_usuario FROM usuarios WHERE email = :e");
 		$sql->bindValue(":e",$email);
 		$sql->execute();
 		if($sql->rowCount() > 0)
@@ -30,7 +31,7 @@ Class Usuario
 		else
 		{
 			//caso nao, Cadastrar
-			$sql = $pdo->prepare("INSERT INTO usuarios (nome, telefone, email, senha) VALUES (:n, :t, :e, :s)");
+			$sql = $this->pdo->prepare("INSERT INTO usuarios (nome, telefone, email, senha) VALUES (:n, :t, :e, :s)");
 			$sql->bindValue(":n",$nome);
 			$sql->bindValue(":t",$telefone);
 			$sql->bindValue(":e",$email);
@@ -43,9 +44,8 @@ Class Usuario
 
 	public function logar($email, $senha)
 	{
-		global $pdo;
 		//verificar se o email e senha estao cadastrados, se sim
-		$sql = $pdo->prepare("SELECT id_usuario FROM usuarios WHERE email = :e AND senha = :s");
+		$sql = $this->pdo->prepare("SELECT id_usuario FROM usuarios WHERE email = :e AND senha = :s");
 		$sql->bindValue(":e",$email);
 		$sql->bindValue(":s",md5($senha));
 		$sql->execute();
