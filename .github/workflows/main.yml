@@ -14,16 +14,37 @@ jobs:
   web-deploy:
     name: Deploy via FTP
     runs-on: ubuntu-latest
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER || vars.FTP_SERVER }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME || vars.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD || vars.FTP_PASSWORD }}
     steps:
       - name: Checkout do codigo
         uses: actions/checkout@v4
 
+      - name: Validando configuracao do FTP
+        run: |
+          if [ -z "$FTP_SERVER" ]; then
+            echo "FTP_SERVER nao foi configurado em Secrets ou Variables do GitHub Actions."
+            exit 1
+          fi
+
+          if [ -z "$FTP_USERNAME" ]; then
+            echo "FTP_USERNAME nao foi configurado em Secrets ou Variables do GitHub Actions."
+            exit 1
+          fi
+
+          if [ -z "$FTP_PASSWORD" ]; then
+            echo "FTP_PASSWORD nao foi configurado em Secrets ou Variables do GitHub Actions."
+            exit 1
+          fi
+
       - name: Sincronizando arquivos
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
+          server: ${{ env.FTP_SERVER }}
+          username: ${{ env.FTP_USERNAME }}
+          password: ${{ env.FTP_PASSWORD }}
           protocol: ftp
           port: 21
           server-dir: /htdocs/
