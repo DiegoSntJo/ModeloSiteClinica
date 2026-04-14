@@ -47,7 +47,7 @@ jobs:
           password: ${{ env.FTP_PASSWORD }}
           protocol: ftp
           port: 21
-          server-dir: /htdocs/
+          server-dir: ./htdocs/
           state-name: .ftp-deploy-sync-state.json
           exclude: |
             **/.git*
